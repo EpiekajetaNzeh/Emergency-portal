@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - BuildifyHub</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dashboard-container {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #f0f0f0;
+            padding: 20px;
+            min-height: calc(100vh - 140px); /* Adjust based on header/footer height */
+        }
+
+        .sidebar h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li a {
+            display: block;
+            padding: 10px;
+            color: #0779e4;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+
+        .sidebar ul li a:hover, .sidebar ul li a.active {
+            background-color: #0779e4;
+            color: #fff;
+        }
+
+        .dashboard-content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .content-section {
+            display: none; /* Hidden by default, shown by JS */
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .content-section.active {
+            display: block;
+        }
+
+        /* Styling for tables, lists, etc. within dashboard sections */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html">BuildifyHub</a>
+            </div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="materials.html">Browse Materials</a></li>
+                <!-- Dynamically show/hide Login/Register vs Dashboard/Logout -->
+                <li id="nav-dashboard"><a href="dashboard.html">Dashboard</a></li>
+                <li id="nav-logout"><a href="#" onclick="handleLogout()">Logout</a></li>
+                <li id="nav-login" style="display:none;"><a href="login.html">Login</a></li>
+                <li id="nav-register" style="display:none;"><a href="register.html">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="dashboard-container">
+        <aside class="sidebar" id="dashboard-sidebar">
+            <h3>Dashboard Menu</h3>
+            <!-- Sidebar content will be dynamically populated based on user type -->
+            <div id="user-info">
+                <p>Welcome, <span id="username-placeholder">[User]</span>!</p>
+                <p>Role: <span id="userrole-placeholder">[Role]</span></p>
+            </div>
+            <ul id="sidebar-menu">
+                <!-- Builder Menu (Example) -->
+                <!-- <li><a href="#" data-section="my-orders">My Orders</a></li> -->
+                <!-- <li><a href="#" data-section="my-profile">My Profile</a></li> -->
+                <!-- <li><a href="#" data-section="browse-materials-link">Browse Materials</a></li> -->
+
+                <!-- Supplier Menu (Example) -->
+                <!-- <li><a href="#" data-section="manage-materials">Manage Materials</a></li> -->
+                <!-- <li><a href="#" data-section="received-orders">Received Orders</a></li> -->
+                <!-- <li><a href="#" data-section="supplier-profile">My Profile</a></li> -->
+            </ul>
+        </aside>
+
+        <section class="dashboard-content" id="dashboard-main-content">
+            <h2 id="section-title">Welcome to your Dashboard</h2>
+
+            <!-- Content sections - shown/hidden by JS -->
+            <div id="welcome-section" class="content-section active">
+                <p>Select an option from the sidebar to get started.</p>
+            </div>
+
+            <!-- Builder Sections -->
+            <div id="my-orders-section" class="content-section">
+                <h3>My Past Orders</h3>
+                <!-- Orders table/list will be populated here -->
+                <p>No orders yet, or loading...</p>
+            </div>
+
+            <div id="my-profile-section" class="content-section">
+                <h3>My Profile</h3>
+                <form id="builder-profile-form">
+                    <!-- Profile fields -->
+                    <p>Profile editing form will be here.</p>
+                    <button type="submit">Save Profile</button>
+                </form>
+            </div>
+
+            <!-- Supplier Sections -->
+            <div id="manage-materials-section" class="content-section">
+                <h3>Manage My Materials</h3>
+                <button id="add-new-material-btn">Add New Material</button>
+                <!-- Materials table/list -->
+                <p>Your listed materials will appear here.</p>
+            </div>
+
+            <div id="received-orders-section" class="content-section">
+                <h3>Orders Received</h3>
+                <!-- Orders table/list for suppliers -->
+                <p>Orders for your materials will appear here.</p>
+            </div>
+
+            <div id="supplier-profile-section" class="content-section">
+                <h3>Supplier Profile</h3>
+                <form id="supplier-profile-form">
+                    <!-- Profile fields for supplier -->
+                    <p>Supplier profile editing form will be here.</p>
+                    <button type="submit">Save Profile</button>
+                </form>
+            </div>
+
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BuildifyHub. All rights reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mock user data - in a real app, this would come from localStorage after login
+            const mockUser = {
+                // username: 'TestBuilder', isSupplier: false, id: 1
+                username: 'TestSupplier', isSupplier: true, id: 2
+            };
+            // const mockUser = null; // Simulate logged out state
+
+            const usernamePlaceholder = document.getElementById('username-placeholder');
+            const userRolePlaceholder = document.getElementById('userrole-placeholder');
+            const sidebarMenu = document.getElementById('sidebar-menu');
+            const sectionTitle = document.getElementById('section-title');
+            const contentSections = document.querySelectorAll('.content-section');
+
+            const navDashboard = document.getElementById('nav-dashboard');
+            const navLogout = document.getElementById('nav-logout');
+            const navLogin = document.getElementById('nav-login');
+            const navRegister = document.getElementById('nav-register');
+
+            if (mockUser) {
+                if (usernamePlaceholder) usernamePlaceholder.textContent = mockUser.username;
+                if (userRolePlaceholder) userRolePlaceholder.textContent = mockUser.isSupplier ? 'Supplier' : 'Builder';
+
+                if (navDashboard) navDashboard.style.display = 'list-item';
+                if (navLogout) navLogout.style.display = 'list-item';
+                if (navLogin) navLogin.style.display = 'none';
+                if (navRegister) navRegister.style.display = 'none';
+
+                populateSidebar(mockUser.isSupplier);
+                setupSectionNavigation();
+            } else {
+                // Redirect to login if no user data (or show limited view)
+                // For this placeholder, we'll just update nav and show a message
+                if (userRolePlaceholder) userRolePlaceholder.textContent = "Not Logged In";
+                if (usernamePlaceholder) usernamePlaceholder.textContent = "Guest";
+                sidebarMenu.innerHTML = '<li>Please <a href="login.html">login</a> to access dashboard features.</li>';
+
+                if (navDashboard) navDashboard.style.display = 'none';
+                if (navLogout) navLogout.style.display = 'none';
+                if (navLogin) navLogin.style.display = 'list-item';
+                if (navRegister) navRegister.style.display = 'list-item';
+
+                showSection('welcome-section', 'Welcome');
+            }
+
+
+            function populateSidebar(isSupplier) {
+                sidebarMenu.innerHTML = ''; // Clear existing items
+                if (isSupplier) {
+                    sidebarMenu.innerHTML += '<li><a href="#" data-section="manage-materials">Manage Materials</a></li>';
+                    sidebarMenu.innerHTML += '<li><a href="#" data-section="received-orders">Received Orders</a></li>';
+                    sidebarMenu.innerHTML += '<li><a href="#" data-section="supplier-profile">My Profile</a></li>';
+                } else {
+                    sidebarMenu.innerHTML += '<li><a href="#" data-section="my-orders">My Orders</a></li>';
+                    sidebarMenu.innerHTML += '<li><a href="#" data-section="my-profile">My Profile</a></li>';
+                    sidebarMenu.innerHTML += '<li><a href="materials.html">Browse Materials</a></li>';
+                }
+            }
+
+            function showSection(sectionId, title) {
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                const activeSection = document.getElementById(sectionId + "-section") || document.getElementById(sectionId);
+                if (activeSection) {
+                    activeSection.classList.add('active');
+                    if(sectionTitle) sectionTitle.textContent = title;
+                } else {
+                    // Fallback to welcome section if ID is wrong
+                    document.getElementById('welcome-section').classList.add('active');
+                    if(sectionTitle) sectionTitle.textContent = "Welcome";
+                }
+            }
+
+            function setupSectionNavigation() {
+                sidebarMenu.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    if (e.target.tagName === 'A' && e.target.dataset.section) {
+                        const sectionId = e.target.dataset.section;
+                        const sectionFriendlyName = e.target.textContent;
+                        showSection(sectionId, sectionFriendlyName);
+
+                        // Update active link styling
+                        sidebarMenu.querySelectorAll('a').forEach(link => link.classList.remove('active'));
+                        e.target.classList.add('active');
+                    }
+                });
+                 // Default to first item or welcome
+                const firstLink = sidebarMenu.querySelector('a[data-section]');
+                if (firstLink) {
+                    showSection(firstLink.dataset.section, firstLink.textContent);
+                    firstLink.classList.add('active');
+                } else {
+                    showSection('welcome-section', 'Welcome to your Dashboard');
+                }
+            }
+
+            // Add New Material button (for suppliers)
+            const addNewMaterialBtn = document.getElementById('add-new-material-btn');
+            if(addNewMaterialBtn && mockUser && mockUser.isSupplier) {
+                addNewMaterialBtn.addEventListener('click', () => {
+                    // This would typically open a modal or navigate to a new material form page
+                    alert("Functionality to add a new material would be here (e.g., a form or modal).");
+                });
+            }
+
+        });
+
+        // handleLogout is already in main.js, but ensure it clears user data and redirects.
+        // For this demo, we'll override it slightly for immediate effect.
+        function handleLogout() {
+            console.log('Logging out...');
+            // Clear mock user (in real app, clear localStorage, cookies, etc.)
+            // mockUser = null; // This won't work as mockUser is const in outer scope.
+            alert("User logged out (simulated). You would be redirected to the login page.");
+            // In a real app:
+            // localStorage.removeItem('authToken');
+            // localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+    </script>
+</body>
+</html>

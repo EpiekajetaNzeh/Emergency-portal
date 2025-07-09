@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Materials - BuildifyHub</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Additional styles specific to materials page */
+        .materials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .material-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .material-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+
+        .material-card h3 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .material-card .price {
+            font-weight: bold;
+            color: #0779e4;
+            font-size: 1.1rem;
+        }
+
+        .material-card .supplier {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-bar input[type="search"] {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .search-bar button {
+            padding: 10px 15px;
+            background-color: #0779e4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .search-bar button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html">BuildifyHub</a>
+            </div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="materials.html">Browse Materials</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html">Register</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="materials-listing">
+            <h2>Available Building Materials</h2>
+
+            <div class="search-bar">
+                <input type="search" id="material-search-input" placeholder="Search by name, category...">
+                <button id="material-search-button">Search</button>
+            </div>
+
+            <div id="materials-grid" class="materials-grid">
+                <!-- Material cards will be dynamically inserted here by JavaScript -->
+                <p id="loading-materials">Loading materials...</p>
+
+                <!-- Example Structure (to be removed or replaced by JS) -->
+                <!--
+                <div class="material-card">
+                    <img src="https://via.placeholder.com/250x150.png?text=Cement+Bag" alt="Material Image">
+                    <h3>Portland Cement Grade A</h3>
+                    <p class="price">$10.00 / bag</p>
+                    <p class="supplier">Supplier: BuildWell Inc.</p>
+                    <p>High-quality cement for all construction needs.</p>
+                    <button class="btn btn-primary">View Details</button>
+                    <button class="btn btn-secondary">Add to Cart</button>
+                </div>
+                <div class="material-card">
+                    <img src="https://via.placeholder.com/250x150.png?text=Red+Bricks" alt="Material Image">
+                    <h3>Red Clay Bricks</h3>
+                    <p class="price">$0.50 / piece</p>
+                    <p class="supplier">Supplier: Brickyard Co.</p>
+                    <p>Durable red clay bricks for walls and structures.</p>
+                    <button class="btn btn-primary">View Details</button>
+                    <button class="btn btn-secondary">Add to Cart</button>
+                </div>
+                -->
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BuildifyHub. All rights reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const materialsGrid = document.getElementById('materials-grid');
+            const loadingMessage = document.getElementById('loading-materials');
+            const searchInput = document.getElementById('material-search-input');
+            const searchButton = document.getElementById('material-search-button');
+
+            // Dummy data for frontend display until backend is connected
+            const dummyMaterials = [
+                { id: 1, name: 'Portland Cement Grade A', price: 10.00, unit: 'bag', supplier: 'BuildWell Inc.', description: 'High-quality cement for all construction needs.', imageUrl: 'https://via.placeholder.com/250x150.png?text=Cement+Bag', category: 'Cement' },
+                { id: 2, name: 'Red Clay Bricks', price: 0.50, unit: 'piece', supplier: 'Brickyard Co.', description: 'Durable red clay bricks for walls and structures.', imageUrl: 'https://via.placeholder.com/250x150.png?text=Red+Bricks', category: 'Bricks' },
+                { id: 3, name: 'Steel Rebar 10mm', price: 15.00, unit: 'ton', supplier: 'MetalWorks Ltd.', description: 'Reinforcement steel bars for concrete.', imageUrl: 'https://via.placeholder.com/250x150.png?text=Steel+Rebar', category: 'Steel' },
+                { id: 4, name: 'Pine Wood Planks', price: 5.00, unit: 'sq ft', supplier: 'Timberland Supplies', description: 'Versatile pine wood planks for various uses.', imageUrl: 'https://via.placeholder.com/250x150.png?text=Wood+Planks', category: 'Wood' },
+            ];
+
+            function displayMaterials(materialsToDisplay) {
+                materialsGrid.innerHTML = ''; // Clear current content (like loading message)
+                if (materialsToDisplay.length === 0) {
+                    materialsGrid.innerHTML = '<p>No materials found.</p>';
+                    return;
+                }
+                materialsToDisplay.forEach(material => {
+                    const card = document.createElement('div');
+                    card.className = 'material-card';
+                    card.innerHTML = `
+                        <img src="${material.imageUrl || 'https://via.placeholder.com/250x150.png?text=Material'}" alt="${material.name}">
+                        <h3>${material.name}</h3>
+                        <p class="price">$${parseFloat(material.price).toFixed(2)} / ${material.unit}</p>
+                        <p class="supplier">Supplier: ${material.supplier}</p>
+                        <p>${material.description.substring(0, 100)}${material.description.length > 100 ? '...' : ''}</p>
+                        <button class="btn btn-primary" onclick="viewMaterialDetails(${material.id})">View Details</button>
+                        <button class="btn btn-secondary" onclick="addToCart(${material.id})">Add to Cart</button>
+                    `;
+                    materialsGrid.appendChild(card);
+                });
+            }
+
+            async function loadMaterials(searchTerm = '') {
+                loadingMessage.style.display = 'block';
+                materialsGrid.innerHTML = ''; // Clear previous results
+
+                // TODO: Replace with actual API call:
+                // const fetchedMaterials = await fetchMaterialsFromAPI(searchTerm);
+                console.log(`Fetching materials (simulated) with search: "${searchTerm}"`);
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+
+                let filteredMaterials = dummyMaterials;
+                if (searchTerm) {
+                    const lowerSearchTerm = searchTerm.toLowerCase();
+                    filteredMaterials = dummyMaterials.filter(m =>
+                        m.name.toLowerCase().includes(lowerSearchTerm) ||
+                        m.category.toLowerCase().includes(lowerSearchTerm) ||
+                        m.description.toLowerCase().includes(lowerSearchTerm)
+                    );
+                }
+
+                if (loadingMessage) loadingMessage.style.display = 'none';
+                displayMaterials(filteredMaterials);
+            }
+
+            // Initial load
+            loadMaterials();
+
+            // Search functionality
+            if (searchButton && searchInput) {
+                searchButton.addEventListener('click', () => {
+                    loadMaterials(searchInput.value);
+                });
+                searchInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        loadMaterials(searchInput.value);
+                    }
+                });
+            }
+        });
+
+        function viewMaterialDetails(materialId) {
+            // In a real app, this would navigate to a material detail page or show a modal
+            console.log(`View details for material ID: ${materialId}`);
+            // Example: window.location.href = `material-detail.html?id=${materialId}`;
+            alert(`Details for material ID ${materialId} would be shown here or on a new page.`);
+        }
+
+        function addToCart(materialId) {
+            // Placeholder for adding to cart functionality
+            console.log(`Add material ID: ${materialId} to cart`);
+            alert(`Material ID ${materialId} added to cart (simulated).`);
+            // This would typically involve updating a cart object in localStorage or sending a request to the backend.
+        }
+    </script>
+</body>
+</html>

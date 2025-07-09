@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BuildifyHub</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html">BuildifyHub</a>
+            </div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="materials.html">Browse Materials</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="auth-form">
+            <h2>Login to Your Account</h2>
+            <form id="login-form">
+                <div id="message-area"></div> <!-- For success/error messages -->
+
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <p class="auth-switch">Don't have an account? <a href="register.html">Register here</a></p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BuildifyHub. All rights reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Specific script for login page
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    clearMessage('message-area');
+
+                    const email = loginForm.email.value;
+                    const password = loginForm.password.value;
+
+                    // Placeholder for actual API call
+                    console.log('Attempting login with:', { email, password });
+                    // Replace with actual handleLogin call from main.js or inline it
+                    try {
+                        // const response = await loginUserApiCall(email, password); // Fictional API call
+                        // Simulating API call
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+
+                        // Mock success:
+                        displayMessage('message-area', 'Login successful! Redirecting to dashboard...', false);
+                        // Store token (e.g., localStorage.setItem('authToken', response.token));
+                        // Store user info (e.g., localStorage.setItem('user', JSON.stringify(response.user)));
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html'; // Redirect to dashboard
+                        }, 2000);
+
+                        // Mock failure:
+                        // throw new Error("Invalid credentials.");
+
+                    } catch (error) {
+                        displayMessage('message-area', `Login failed: ${error.message}`, true);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

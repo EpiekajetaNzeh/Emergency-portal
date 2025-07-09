@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - BuildifyHub</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html">BuildifyHub</a>
+            </div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="materials.html">Browse Materials</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="register.html">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="auth-form">
+            <h2>Create Your Account</h2>
+            <form id="registration-form">
+                <div id="message-area"></div> <!-- For success/error messages -->
+
+                <div>
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required minlength="6">
+                </div>
+                <div>
+                    <label for="confirm-password">Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <div>
+                    <label for="isSupplier">
+                        <input type="checkbox" id="isSupplier" name="isSupplier">
+                        Register as a Supplier?
+                    </label>
+                </div>
+                <button type="submit">Register</button>
+            </form>
+            <p class="auth-switch">Already have an account? <a href="login.html">Login here</a></p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BuildifyHub. All rights reserved.</p>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Specific script for registration page
+        document.addEventListener('DOMContentLoaded', () => {
+            const registrationForm = document.getElementById('registration-form');
+            if (registrationForm) {
+                registrationForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    clearMessage('message-area');
+
+                    const username = registrationForm.username.value;
+                    const email = registrationForm.email.value;
+                    const password = registrationForm.password.value;
+                    const confirmPassword = registrationForm['confirm-password'].value;
+                    const isSupplier = registrationForm.isSupplier.checked;
+
+                    if (password !== confirmPassword) {
+                        displayMessage('message-area', 'Passwords do not match!', true);
+                        return;
+                    }
+                    if (password.length < 6) {
+                        displayMessage('message-area', 'Password must be at least 6 characters long.', true);
+                        return;
+                    }
+
+                    // Placeholder for actual API call
+                    console.log('Submitting registration:', { username, email, password, isSupplier });
+                    // Replace with actual handleRegister call from main.js or inline it
+                    // For now, just a placeholder response
+                    try {
+                        // const response = await registerUserApiCall(username, email, password, isSupplier); // Fictional API call
+                        // Simulating API call
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+
+                        // Mock success
+                        displayMessage('message-area', 'Registration successful! Redirecting to login...', false);
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+
+                        // Mock failure
+                        // throw new Error("Username or email already exists.");
+
+                    } catch (error) {
+                        displayMessage('message-area', `Registration failed: ${error.message}`, true);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
