@@ -155,47 +155,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
   </div>
 </div>
 <?php include_once('includes/footer.php'); ?>
-<!-- Simplified MoMo Simulator Modal -->
-<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true" data-bs-backdrop="static">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow" style="border-radius: 12px; overflow: hidden;">
-      <div class="modal-header text-white" style="background: #3fbbc0; border-bottom: none;">
-        <h5 class="modal-title fw-bold" id="paymentModalLabel"><i class="fas fa-mobile-alt me-2"></i> Mobile Money Payment</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-4 text-center">
-        <p class="mb-4 text-muted">You are about to authorize a payment of <strong class="text-dark fs-5">30,000 FCFA</strong> for this ambulance request.</p>
-        
-        <div class="mb-4 text-start">
-            <label class="form-label text-muted fw-bold small text-uppercase">Mobile Money Number</label>
-            <div class="input-group input-group-lg">
-                <span class="input-group-text bg-light border-end-0"><i class="fas fa-phone text-secondary"></i></span>
-                <input type="text" id="momoNumber" class="form-control border-start-0 ps-0" placeholder="e.g., 670000000" pattern="[0-9]{9}" maxlength="9">
-            </div>
-        </div>
-
-        <div id="paymentProcessing" class="d-none my-4">
-            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-              <span class="visually-hidden">Processing...</span>
-            </div>
-            <p class="mt-3 fw-bold text-primary">Dial *126# or *150# to confirm...</p>
-        </div>
-
-        <div id="paymentSuccess" class="d-none my-4">
-            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
-            <h4 class="mt-3 text-success fw-bold">Payment Successful!</h4>
-            <p class="text-muted small">Transaction ID: <span id="displayTxnId" class="fw-bold"></span></p>
-        </div>
-
-        <button type="button" id="payBtn" class="btn btn-lg w-100 text-white fw-bold shadow-sm" style="background: #3fbbc0; border-radius: 8px;">
-            Pay 30,000 FCFA Now
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+<!-- Hidden trigger button for CamPay SDK -->
+<button type="button" id="payButton" class="d-none"></button>
 
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://demo.campay.net/sdk/js?app-id=72Zz60HKh10kP6Egfx_lsigAvW9Cee1UVIMuHHA0tvR_2aCqFu9pg6Sj6ld-Z3qjbg3gLKLMOxoAu_xGq_g5bg"></script>
 <script>
 // Remove preloader if present
 window.addEventListener('DOMContentLoaded', function() {
@@ -208,56 +172,59 @@ document.getElementById('paymentAgreement').addEventListener('change', function(
     document.getElementById('submitBtn').disabled = !this.checked;
 });
 
-// Payment Simulation Logic
+// Configure CamPay Options initially
+campay.options({
+    payButtonId: "payButton",
+    description: "Ambulance Hiring Fee",
+    amount: "30000",
+    currency: "XAF",
+    externalReference: "",
+    redirectUrl: ""
+});
+
+// Payment Integration Logic
 document.getElementById('ambulanceForm').addEventListener('submit', function(e) {
     if (!document.getElementById('transaction_id').value) {
         e.preventDefault(); // Stop form from submitting immediately
         
-        // Ensure form is valid before showing modal
+        // Ensure form is valid before initiating payment
         if (this.checkValidity()) {
-            var paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-            paymentModal.show();
+            var patientName = document.getElementById('pname').value;
+            var relativePhone = document.getElementById('phone').value;
+            
+            // Configure CamPay options dynamically
+            campay.options({
+                payButtonId: "payButton",
+                description: "Ambulance Hire - " + patientName,
+                amount: "30000",
+                currency: "XAF",
+                externalReference: relativePhone,
+                redirectUrl: ""
+            });
+            
+            // Programmatically click the hidden payButton to trigger CamPay modal
+            document.getElementById('payButton').click();
         } else {
             this.reportValidity();
         }
     }
 });
 
-document.getElementById('payBtn').addEventListener('click', function() {
-    var number = document.getElementById('momoNumber').value;
-    if(number.length !== 9) {
-        alert("Please enter a valid 9-digit Mobile Money number.");
-        return;
-    }
+// CamPay Callbacks
+campay.onSuccess = function (data) { 
+    // Set transaction reference in the hidden field
+    document.getElementById('transaction_id').value = data.reference;
+    // Submit the form programmatically
+    HTMLFormElement.prototype.submit.call(document.getElementById('ambulanceForm'));
+};
 
-    // Hide inputs, show spinner
-    document.getElementById('momoNumber').parentElement.parentElement.classList.add('d-none');
-    this.classList.add('d-none');
-    document.getElementById('paymentProcessing').classList.remove('d-none');
+campay.onFail = function (data) { 
+    alert('Payment Failed! Status: ' + data.status + '\nReference: ' + data.reference);
+};
 
-    // Simulate 4-second API Gateway delay
-    setTimeout(function() {
-        document.getElementById('paymentProcessing').classList.add('d-none');
-        document.getElementById('paymentSuccess').classList.remove('d-none');
-        
-        // Generate mock transaction ID
-        var mockTxnId = 'MOMO_' + Math.random().toString(36).substr(2, 9).toUpperCase();
-        document.getElementById('displayTxnId').innerText = mockTxnId;
-        
-        // Inject into hidden form field
-        document.getElementById('transaction_id').value = mockTxnId;
-
-        // Auto-submit the actual form after 1.5 seconds so user sees success
-        setTimeout(function() {
-            var modal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
-            modal.hide();
-            
-            // Bypass the event listener by triggering submit on the form element directly
-            HTMLFormElement.prototype.submit.call(document.getElementById('ambulanceForm'));
-        }, 1500);
-
-    }, 4000);
-});
+campay.onModalClose = function (data) { 
+    console.log('Payment modal closed: ' + data.status);
+};
 </script>
 </body>
 </html>
