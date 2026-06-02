@@ -134,7 +134,7 @@ CREATE TABLE `tblpage` (
 
 INSERT INTO `tblpage` (`ID`, `PageType`, `PageTitle`, `PageDescription`, `Email`, `MobileNumber`, `UpdationDate`) VALUES
 (1, 'aboutus', 'About us', '<div style=\"text-align: center;\"><b>Emergency Ambulance Hiring Portal</b></div><div style=\"text-align: left;\">We prioritize the well-being of our patients above all else. Thats why we offer top-notch ambulance services to ensure swift and secure medical transportation whenever the need arises. Our dedicated team of skilled paramedics and drivers is equipped with state-of-the-art ambulances, ready to respond to emergencies 24/7.<br></div><div style=\"text-align: left;\"><br></div>', NULL, NULL, '2024-03-05 05:00:17'),
-(2, 'contactus', 'Contact Us', '#890 KFG Apartment, Gauri Kunj, Delhi-India.', 'test@gmail.com', 7894561236, '2024-03-05 05:06:13');
+(2, 'contactus', 'Contact Us', 'Molyko Checkpoint, Buea', 'kajetaepie@gmail.com', 671683311, '2026-06-03 00:00:00');
 
 -- --------------------------------------------------------
 
