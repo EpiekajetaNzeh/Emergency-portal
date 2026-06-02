@@ -178,6 +178,21 @@ while ($row = mysqli_fetch_array($ret)) {
          <th>Driver Contact Number</th>
         <td>Not Assigned Yet</td>
       </tr><?php }?>
+  <tr>
+      <th>Payment Status</th>
+      <td>
+          <?php 
+          $payStatus = $row['PaymentStatus'];
+          if ($payStatus == 'Paid') {
+              echo '<span class="badge bg-success">Paid</span>';
+          } else {
+              echo '<span class="badge bg-warning text-dark">Pending</span>';
+          }
+          ?>
+      </td>
+      <th>Transaction ID</th>
+      <td><?php echo !empty($row['TransactionID']) ? htmlentities($row['TransactionID']) : 'N/A'; ?></td>
+  </tr>
 </table>
 
 <?php

@@ -185,6 +185,21 @@ while ($row = mysqli_fetch_array($ret)) {
         <th>Ambulance Type</th>
         <td colspan="3"><?php echo $ambulanceTypeText; ?></td>
     </tr>
+    <tr>
+        <th>Payment Status</th>
+        <td>
+            <?php 
+            $payStatus = $row['PaymentStatus'];
+            if ($payStatus == 'Paid') {
+                echo '<span class="badge badge-success" style="background-color: #28a745; color: #fff;">Paid</span>';
+            } else {
+                echo '<span class="badge badge-warning" style="background-color: #ffc107; color: #000;">Pending</span>';
+            }
+            ?>
+        </td>
+        <th>Transaction ID</th>
+        <td><?php echo !empty($row['TransactionID']) ? htmlentities($row['TransactionID']) : 'N/A'; ?></td>
+    </tr>
     <!-- Display other request details -->
 
     <?php if ($row['Remark'] != ''): ?>

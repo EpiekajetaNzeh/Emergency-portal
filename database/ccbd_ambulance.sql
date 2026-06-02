@@ -94,6 +94,8 @@ CREATE TABLE `tblambulancehiring` (
   `Remark` varchar(250) DEFAULT NULL,
   `Status` varchar(250) DEFAULT NULL,
   `AmbulanceRegNo` varchar(250) DEFAULT NULL,
+  `PaymentStatus` varchar(100) DEFAULT NULL,
+  `TransactionID` varchar(200) DEFAULT NULL,
   `UpdationDate` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
