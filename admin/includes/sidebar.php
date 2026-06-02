@@ -17,6 +17,8 @@
                     <ul class="sub">
                         <li><a href="add-ambulance.php">Add Ambulance</a></li>
                         <li><a href="manage-ambulance.php">Manage Ambulance</a></li>
+                        <li><a href="pending-ambulance-registrations.php">Pending Registrations</a></li>
+                        <li><a href="simulate-tracking.php">Simulate Tracking</a></li>
                        
                     </ul>
                 </li>

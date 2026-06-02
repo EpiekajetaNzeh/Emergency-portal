@@ -18,8 +18,8 @@ if (strlen($_SESSION['eahpaid']==0)) {
 echo "<script>alert('This ambulance already registered');</script>";
     }
     else{
-     
-    $query=mysqli_query($con, "insert into tblambulance(AmbulanceType,AmbRegNum,DriverName,DriverContactNumber) value('$ambulancetype','$ambregnum','$dname','$dconnum')");
+     $status = $_POST['status'];
+    $query=mysqli_query($con, "insert into tblambulance(AmbulanceType,AmbRegNum,DriverName,DriverContactNumber,Status) value('$ambulancetype','$ambregnum','$dname','$dconnum','$status')");
     if ($query) {
    
     echo "<script>alert('Ambulance detail added successfully.');</script>";
@@ -37,15 +37,16 @@ echo "<script type='text/javascript'> document.location = 'add-ambulance.php'; <
 
 <!DOCTYPE html>
 <head>
-<title>Add Ambulance</title>
+<title> Add Ambulance | Administrative Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
 <!-- bootstrap-css -->
 <link rel="stylesheet" href="css/bootstrap.min.css" >
 <!-- //bootstrap-css -->
 <!-- Custom CSS -->
-<link href="css/style.css" rel='stylesheet' type='text/css' />
-<link href="css/style-responsive.css" rel="stylesheet"/>
+<link href="css/style.css?v=<?=time()?>" rel='stylesheet' type='text/css' />
+<link href="css/style-responsive.css?v=<?=time()?>" rel="stylesheet"/>
 <!-- font CSS -->
 <link href='//fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
 <!-- font-awesome icons -->
@@ -125,6 +126,17 @@ echo "<script type='text/javascript'> document.location = 'add-ambulance.php'; <
                                             
                                         </div>
                                         
+                                    </div>
+
+                                    <div class="form-group ">
+                                        <label for="status" class="control-label col-lg-3">Status / Availability</label>
+                                        <div class="col-lg-6">
+                                            <select name="status" id="status" class="form-control" required="true">
+                                                <option value="">Select Status</option>
+                                                <option value="available">Available</option>
+                                                <option value="not available">Not Available</option>
+                                            </select>
+                                        </div>
                                     </div>
                                    
                                     <div class="form-group">

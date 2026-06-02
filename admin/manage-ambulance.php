@@ -5,6 +5,25 @@ include('includes/dbconnection.php');
 if (strlen($_SESSION['eahpaid']==0)) {
   header('location:logout.php');
   } else{
+// Accept/Reject logic
+if (isset($_GET['action']) && isset($_GET['id'])) {
+  $id = intval($_GET['id']);
+  $action = $_GET['action'];
+  if ($action === 'accept') {
+    $status = 'available';
+    $msg = "Ambulance accepted and now available.";
+  } elseif ($action === 'reject') {
+    $status = 'rejected';
+    $msg = "Ambulance registration rejected.";
+  }
+  if (isset($status)) {
+    mysqli_query($con, "UPDATE tblambulance SET Status='$status' WHERE ID='$id'");
+    echo "<script>alert('$msg');window.location='manage-ambulance.php';</script>";
+    exit();
+  }
+}
+
+// Delete logic
 if(isset($_GET['del']))
 {
   $rid=$_GET['del'];
@@ -18,14 +37,15 @@ if(isset($_GET['del']))
 
 <!DOCTYPE html>
 <head>
-<title> Manage Ambulance </title>
+<title> Manage Ambulance | Administrative Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
 <!-- bootstrap-css -->
 <link rel="stylesheet" href="css/bootstrap.min.css" >
 <!-- //bootstrap-css -->
 <!-- Custom CSS -->
-<link href="css/style.css" rel='stylesheet' type='text/css' />
-<link href="css/style-responsive.css" rel="stylesheet"/>
+<link href="css/style.css?v=<?=time()?>" rel='stylesheet' type='text/css' />
+<link href="css/style-responsive.css?v=<?=time()?>" rel="stylesheet"/>
 <!-- font CSS -->
 <link href='//fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
 <!-- font-awesome icons -->
@@ -50,7 +70,7 @@ if(isset($_GET['del']))
     <div class="panel-heading">
      Manage Ambulance
     </div>
-    <div>
+    <div class="table-responsive">
       <table class="table table-bordered">
         <thead>
           <tr>
@@ -59,6 +79,8 @@ if(isset($_GET['del']))
             <th>Ambulance Reg No.</th>
              <th>Name of Driver</th>
               <th>Phone Number of Driver</th>
+                        <th>Authorization Document</th>
+                        <th>Status</th>
             <th>Creation Date</th>
             <th data-breakpoints="xs">Action</th>
            
@@ -84,13 +106,26 @@ while ($row=mysqli_fetch_array($ret)) {
                    <?php } elseif($atype=="4"){ ?>
                      <td>Boat Ambulance</td>
                      <?php } ?>
-                 
                   <td><?php  echo $row['AmbRegNum'];?></td>
                   <td><?php  echo $row['DriverName'];?></td>
                   <td><?php  echo $row['DriverContactNumber'];?></td>
+                  <td>
+                    <?php if (!empty($row['AuthDocument'])): ?>
+                      <a href="../<?php echo $row['AuthDocument']; ?>" target="_blank">View Document</a>
+                    <?php else: ?>
+                      No document
+                    <?php endif; ?>
+                  </td>
+                  <td><?php echo $row['Status']; ?></td>
                   <td><?php  echo $row['CreationDate'];?></td>
-                  <td><a href="edit-ambulance.php?editid=<?php echo $row['ID'];?>" class="btn btn-primary">Edit</a> 
+                  <td>
+                    <a href="edit-ambulance.php?editid=<?php echo $row['ID'];?>" class="btn btn-primary">Edit</a> 
                     <a href="manage-ambulance.php?del=<?php echo $row['ID'];?>" class="btn btn-danger">Delete</a>
+                    <?php if ($row['Status'] == 'pending'): ?>
+                      <a href="manage-ambulance.php?action=accept&id=<?php echo $row['ID']; ?>" class="btn btn-success">Accept</a>
+                      <a href="manage-ambulance.php?action=reject&id=<?php echo $row['ID']; ?>" class="btn btn-warning">Reject</a>
+                    <?php endif; ?>
+                  </td>
                 </tr>
                 <?php 
 $cnt=$cnt+1;

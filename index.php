@@ -2,7 +2,7 @@
 session_start();
 //error_reporting(0);
 include('includes/dbconnection.php');
-if(isset($_POST['submit'])) {
+if($_SERVER['REQUEST_METHOD'] == 'POST') {
     
     $bookingnum = mt_rand(100000000, 999999999);
     $pname = $_POST['pname'];
@@ -15,8 +15,10 @@ if(isset($_POST['submit'])) {
     $city = $_POST['city'];
     $state = $_POST['state'];
     $message = $_POST['message'];
-   
-    $query = mysqli_query($con, "INSERT INTO tblambulancehiring (BookingNumber, PatientName, RelativeName, RelativeConNum, HiringDate, HiringTime, AmbulanceType, Address, City, State, Message) VALUES ('$bookingnum', '$pname', '$rname', '$phone', '$hdate', '$htime', '$ambulancetype', '$address', '$city', '$state', '$message')");
+    $transaction_id = isset($_POST['transaction_id']) ? $_POST['transaction_id'] : '';
+    $payment_status = $transaction_id ? 'Paid' : 'Pending';
+
+    $query = mysqli_query($con, "INSERT INTO tblambulancehiring (BookingNumber, PatientName, RelativeName, RelativeConNum, HiringDate, HiringTime, AmbulanceType, Address, City, State, Message, PaymentStatus, TransactionID) VALUES ('$bookingnum', '$pname', '$rname', '$phone', '$hdate', '$htime', '$ambulancetype', '$address', '$city', '$state', '$message', '$payment_status', '$transaction_id')");
 
     if ($query) {
         echo "<script>alert('Your request has been sent successfully. Your Booking Number is: $bookingnum');</script>";
@@ -31,6 +33,8 @@ if(isset($_POST['submit'])) {
 <html lang="en">
 
 <head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
   
   <title>Emergancy Ambulance Hiring Portal</title>
  
@@ -73,28 +77,34 @@ if(isset($_POST['submit'])) {
       <div class="carousel-inner" role="listbox">
 
         <!-- Slide 1 -->
-        <div class="carousel-item active" style="background-image: url(assets/img/slide/slide-1.jpg)">
+        <div class="carousel-item active" style="background-image: url(assets/img/slide/Ambulance2.jpeg)">
           <div class="container">
             <h2>Welcome to <span>Emergency Ambulance Hiring Portal</span></h2>
-  
-            <a href="#appointment" class="btn-get-started scrollto">Hire Ambulance</a>
+            <a href="#ambulance-availability" class="btn-get-started scrollto">View Ambulances</a>
           </div>
         </div>
 
         <!-- Slide 2 -->
-        <div class="carousel-item" style="background-image: url(assets/img/slide/slide-2.jpg)">
+        <div class="carousel-item" style="background-image: url(assets/img/slide/Doctor%20ambu.jpeg)">
           <div class="container">
-            <h2>Welcome to <span>Emergency Ambulance Hiring Portal</h2>
-        
+            <h2>Fast, Reliable, Professional</h2>
             <a href="#about" class="btn-get-started scrollto">Read More</a>
           </div>
         </div>
 
         <!-- Slide 3 -->
-        <div class="carousel-item" style="background-image: url(assets/img/slide/slide-3.jpg)">
+        <div class="carousel-item" style="background-image: url(assets/img/slide/Doctor.jpeg)">
           <div class="container">
-            <h2>Welcome to <span>Emergency Ambulance Hiring Portal</h2>
+            <h2>Expert Medical Team Onboard</h2>
             <a href="#about" class="btn-get-started scrollto">Read More</a>
+          </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="carousel-item" style="background-image: url(assets/img/slide/Ambulance3.jpeg)">
+          <div class="container">
+            <h2>24/7 Emergency Support</h2>
+            <a href="#contact" class="btn-get-started scrollto">Contact Us</a>
           </div>
         </div>
 
@@ -113,37 +123,84 @@ if(isset($_POST['submit'])) {
 
   <main id="main">
 
+    <!-- Registration link removed as requested -->
+    <!-- ======= Ambulance Availability Section ======= -->
+    <section id="ambulance-availability" class="ambulance-availability">
+      <div class="container" data-aos="fade-up">
+        <div class="section-title">
+          <h2>EMERGENCY AMBULANCES</h2>
+        </div>
+        <div class="row">
+          <?php
+          $query = mysqli_query($con, "SELECT * FROM tblambulance");
+          $ambu_images = ['Ambu 1.jpg', 'Ambu 2.jpg', 'Ambu 3.jpg', 'Ambu 4.jpg', 'Ambu 5.jpeg', 'Ambu 6.jpg', 'Ambu 7.jpg', 'Ambu 8.jpg', 'Ambu 9.jpg', 'Ambu 10.jpg'];
+          $img_idx = 0;
+          $total_imgs = count($ambu_images);
+          while ($row = mysqli_fetch_array($query)) {
+            $status = strtolower(trim($row['Status']));
+            $isAvailable = ($status == '' || $status == 'available' || $status == 'reached');
+            $selected_img = "assets/img/Ambulances/" . $ambu_images[$img_idx % $total_imgs];
+            $img_idx++;
+          ?>
+          <div class="col-lg-4 col-md-6 col-sm-12 mb-4 d-flex align-items-stretch">
+            <div class="card shadow border-0 w-100" style="border-radius: 8px; overflow: hidden; transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform='translateY(0)'">
+              <img src="<?php echo $selected_img; ?>" class="card-img-top" alt="Ambulance Images" style="height: 220px; object-fit: cover;">
+              <div class="card-body p-4 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="card-title mb-0" style="color: #2c4964; font-weight: 700; font-size: 1.1rem;">Reg No: <?php echo $row['AmbRegNum']; ?></h5>
+                  <span class="badge <?php echo $isAvailable ? 'bg-primary' : 'bg-danger'; ?>" style="<?php echo $isAvailable ? 'background-color: #3fbbc0 !important; font-size: 0.85rem; padding: 6px 10px;' : 'font-size: 0.85rem; padding: 6px 10px;'; ?>">
+                    <?php echo ($status == '' || $status == 'available') ? "Available" : ucfirst($status); ?>
+                  </span>
+                </div>
+                <hr class="mt-0 mb-3" style="border-top: 1px solid #eee;">
+                <p class="card-text mb-2"><i class="fas fa-ambulance me-2" style="color: #3fbbc0;"></i> <strong>Type:</strong> <?php echo $row['AmbulanceType']; ?></p>
+                <p class="card-text mb-4"><i class="fas fa-user-md me-2" style="color: #3fbbc0;"></i> <strong>Driver:</strong> <?php echo $row['DriverName']; ?> <br><span class="text-muted" style="margin-left: 24px; font-size: 0.9em;">(<?php echo $row['DriverContactNumber']; ?>)</span></p>
+                
+                <div class="mt-auto">
+                  <?php if ($isAvailable) { ?>
+                    <a href="hire-ambulance.php?id=<?php echo $row['ID']; ?>" class="btn btn-primary w-100" style="border-radius: 5px; font-weight: 600; padding: 10px;">Hire This Ambulance</a>
+                  <?php } else { ?>
+                    <button class="btn btn-secondary w-100" style="border-radius: 5px; font-weight: 600; padding: 10px;" disabled>Currently Unavailable</button>
+                  <?php } ?>
+                </div>
+              </div>
+            </div>
+          </div>
+          <?php } ?>
+        </div>
+      </div>
+    </section>
+    <!-- End Ambulance Availability Section -->
     <!-- ======= Featured Services Section ======= -->
     <section id="featured-services" class="featured-services">
       <div class="container" data-aos="fade-up">
-
         <div class="row">
-          <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box" data-aos="fade-up" data-aos-delay="100">
+          <div class="col-6 col-md-6 col-lg-3 d-flex align-items-stretch mb-4">
+            <div class="icon-box w-100" data-aos="fade-up" data-aos-delay="100">
               <div class="icon"><i class="fas fa-heartbeat"></i></div>
               <h4 class="title"><a href="">Life Support</a></h4>
          
             </div>
           </div>
 
-          <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box" data-aos="fade-up" data-aos-delay="200">
+          <div class="col-6 col-md-6 col-lg-3 d-flex align-items-stretch mb-4">
+            <div class="icon-box w-100" data-aos="fade-up" data-aos-delay="200">
               <div class="icon"><i class="fas fa-pills"></i></div>
               <h4 class="title"><a href="">Medical Support</a></h4>
  
             </div>
           </div>
 
-          <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box" data-aos="fade-up" data-aos-delay="300">
+          <div class="col-6 col-md-6 col-lg-3 d-flex align-items-stretch mb-4">
+            <div class="icon-box w-100" data-aos="fade-up" data-aos-delay="300">
               <div class="icon"><i class="fas fa-thermometer"></i></div>
               <h4 class="title"><a href="">Emergency Kit</a></h4>
          
             </div>
           </div>
 
-          <div class="col-md-6 col-lg-3 d-flex align-items-stretch mb-5 mb-lg-0">
-            <div class="icon-box" data-aos="fade-up" data-aos-delay="400">
+          <div class="col-6 col-md-6 col-lg-3 d-flex align-items-stretch mb-4">
+            <div class="icon-box w-100" data-aos="fade-up" data-aos-delay="400">
               <div class="icon"><i class="fas fa-baby"></i></div>
               <h4 class="title"><a href="">NICU Support
               </a></h4>
@@ -169,22 +226,69 @@ if(isset($_POST['submit'])) {
     </section><!-- End Cta Section -->
 
     <!-- ======= About Us Section ======= -->
-    <section id="about" class="about">
+    <!-- ======= About Us Section ======= -->
+    <section id="about" class="about" style="padding: 100px 0; background: #f9fcfc;">
       <div class="container" data-aos="fade-up">
 
-        <div class="section-title">
-          <h2>About Us</h2>
-          <?php
+        <div class="card border-0 shadow-lg" style="border-radius: 12px; overflow: hidden; background: #fff;">
+          <div class="row g-0">
+            
+            <!-- Image Side -->
+            <div class="col-lg-5 position-relative" style="min-height: 450px;">
+              <img src="assets/img/gallery/Doctor.jpg" alt="About Us" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top;">
+              
+              <!-- Floating Badge -->
+              <div style="position: absolute; bottom: 30px; right: -25px; background: #3fbbc0; padding: 20px 30px; border-radius: 8px; color: #fff; box-shadow: 0 10px 25px rgba(63,187,192,0.4); text-align: center; z-index: 2;">
+                <h3 style="margin: 0; font-size: 2.2rem; font-weight: 800;">24/7</h3>
+                <p style="margin: 0; font-size: 1rem; font-weight: 600; text-transform: uppercase;">Emergency<br>Support</p>
+              </div>
+            </div>
+            
+            <!-- Text Side -->
+            <div class="col-lg-7">
+              <div class="card-body" style="padding: 60px 50px;">
+                <div class="section-title text-start pb-2">
+                  <h2 style="font-size: 2.2rem; color: #2c4964; margin-bottom: 15px;">Who We Are</h2>
+                </div>
+                
+                <?php
+                $ret=mysqli_query($con,"select * from tblpage where PageType='aboutus' ");
+                while ($row=mysqli_fetch_array($ret)) {
+                ?>
+                <p style="font-size: 1.1rem; line-height: 1.8; color: #555;">
+                  <?php  echo $row['PageDescription'];?>
+                </p>
+                <?php } ?>
+                
+                <div class="mt-4 pt-4 border-top">
+                  <div class="row g-4">
+                    <div class="col-md-6 d-flex align-items-center">
+                      <div style="background: #e9f7f8; color: #3fbbc0; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 4px 10px rgba(63,187,192,0.15);">
+                        <i class="fas fa-ambulance" style="font-size: 1.2rem;"></i>
+                      </div>
+                      <div>
+                        <h5 style="margin: 0; font-weight: 700; color: #2c4964; font-size: 1.05rem;">Fast & Reliable</h5>
+                        <span style="color: #777; font-size: 0.9rem;">Rapid deployment.</span>
+                      </div>
+                    </div>
 
-$ret=mysqli_query($con,"select * from tblpage where PageType='aboutus' ");
-$cnt=1;
-while ($row=mysqli_fetch_array($ret)) {
+                    <div class="col-md-6 d-flex align-items-center">
+                      <div style="background: #e9f7f8; color: #3fbbc0; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; box-shadow: 0 4px 10px rgba(63,187,192,0.15);">
+                        <i class="fas fa-heartbeat" style="font-size: 1.2rem;"></i>
+                      </div>
+                      <div>
+                        <h5 style="margin: 0; font-weight: 700; color: #2c4964; font-size: 1.05rem;">Expert Medical Team</h5>
+                        <span style="color: #777; font-size: 0.9rem;">Trained professionals.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-?>
-          <p><?php  echo $row['PageDescription'];?></p><?php } ?>
+              </div>
+            </div>
+
+          </div>
         </div>
-
-      
 
       </div>
     </section><!-- End About Us Section -->
@@ -193,122 +297,61 @@ while ($row=mysqli_fetch_array($ret)) {
 
 
 
-    <!-- ======= Appointment Section ======= -->
-    <section id="appointment" class="appointment section-bg">
-      <div class="container" data-aos="fade-up">
 
-        <div class="section-title">
-          <h2>Hire an Ambulance</h2>
-        </div>
-
-        <form action="" method="post" role="form" class="form-control" data-aos="fade-up" data-aos-delay="100">
-          <div class="row" style="padding-top:20px">
-            <div class="col-md-4 form-group">
-              <input type="text" name="pname" class="form-control" id="pname" placeholder="Enter Patient Name" required>
-            </div>
-            <div class="col-md-4 form-group">
-              <input type="text" name="rname" class="form-control" id="rname" placeholder="Enter Relative Name" required>
-            </div>
-           
-            <div class="col-md-4 form-group mt-3 mt-md-0">
-              <input type="tel" class="form-control" name="phone" id="phone" placeholder="Enter Relative Phone Number" required>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-4 form-group mt-3">
-              <input type="date" name="hdate" class="form-control datepicker" id="hdate" placeholder="Hiring Date" required>
-            </div>
-            <div class="col-md-4 form-group mt-3">
-              <input type="time" name="htime" class="form-control datepicker" id="htime" placeholder="Hiring Time" required>
-            </div>
-            <div class="col-md-4 form-group mt-3">
-              <select name="ambulancetype" id="ambulancetype" class="form-select">
-                <option value="">Select Type of Ambulance</option>
-                <option value="1">Basic Life Support (BLS) Ambulances</option>
-                <option value="2"> Advanced Life Support (ALS) Ambulances</option>
-                <option value="3">Non-Emergency Patient Transport Ambulances</option>
-                <option value="4">Boat Ambulance</option>
-                
-               
-              </select>
-            </div>
-          </div>
-           <div class="row" style="padding-top:20px">
-            <div class="col-md-4 form-group">
-              <input type="text" name="address" class="form-control" id="address" placeholder="Enter Address" required>
-            </div>
-            <div class="col-md-4 form-group">
-              <input type="text" name="city" class="form-control" id="city" placeholder="Enter City" required>
-            </div>
-           
-            <div class="col-md-4 form-group mt-3 mt-md-0">
-              <input type="text" class="form-control" name="state" id="state" placeholder="Enter State" required>
-            </div>
-          </div>
-
-          <div class="form-group mt-3">
-            <textarea class="form-control" name="message" rows="5" placeholder="Message (Optional)"></textarea>
-          </div>
-         
-          <div class="text-center" style="padding-top: 20px;padding-bottom: 20px;"><button type="submit"  name="submit" class="btn btn-primary">Submit</button></div>
-        </form>
-
-      </div>
-    </section><!-- End Appointment Section -->
 
 
     <!-- ======= Contact Section ======= -->
-    <section id="contact" class="contact">
-      <div class="container">
+    <section id="contact" class="contact" style="padding: 100px 0; background: #fff;">
+      <div class="container" data-aos="fade-up">
 
-        <div class="section-title">
-          <h2>Contact</h2>
-          <p>We are the elite Emergency Hub designed to meet the needs of the people and community as a whole. We are fast, reliable and comfortable to book with easy access. The welbeing of the society is our priority.</p>
+        <div class="section-title text-center mb-5">
+          <h2 style="font-size: 2.4rem; color: #2c4964; margin-bottom: 20px;">Get In Touch</h2>
+          <p style="font-size: 1.1rem; color: #666; max-width: 800px; margin: 0 auto; line-height: 1.8;">We are the elite Emergency Hub designed to meet the needs of the people and community as a whole. We are fast, reliable and comfortable to book with easy access. The wellbeing of the society is our priority.</p>
         </div>
 
-      </div>
-
-  
-
-      <div class="container">
-
-        <div class="row mt-5">
-
-          <div class="col-lg-12">
-
-             <div class="row">
-              <?php 
- $query=mysqli_query($con,"select * from  tblpage where PageType='contactus'");
- while ($row=mysqli_fetch_array($query)) {
-
-
- ?>
-              <div class="col-md-12">
-                <div class="info-box">
-                  <i class="bx bx-map"></i>
-                  <h3>Our Address</h3>
-                  <p><?php  echo $row['PageDescription'];?></p>
-                </div>
+        <?php 
+        $query=mysqli_query($con,"select * from tblpage where PageType='contactus'");
+        while ($row=mysqli_fetch_array($query)) {
+        ?>
+        <div class="row g-4 mt-2 justify-content-center">
+          
+          <!-- Address Card -->
+          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="100">
+            <div class="info-card h-100 p-5 text-center rounded shadow-sm" style="background: #fcfdfd; border: 1px solid #eef5f5; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 35px rgba(63,187,192,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 .125rem .25rem rgba(0,0,0,.075)';">
+              <div class="icon-wrapper mb-4" style="width: 80px; height: 80px; background: #e9f7f8; color: #3fbbc0; font-size: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 4px 15px rgba(63,187,192,0.2);">
+                <i class="bx bx-map"></i>
               </div>
-              <div class="col-md-6">
-                <div class="info-box mt-4">
-                  <i class="bx bx-envelope"></i>
-                  <h3>Email Us</h3>
-                  <p><?php  echo $row['Email'];?></p>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-box mt-4">
-                  <i class="bx bx-phone-call"></i>
-                  <h3>Call Us</h3>
-                  <p><?php  echo $row['MobileNumber'];?></p>
-                </div>
-              </div><?php } ?>
+              <h3 style="font-size: 1.5rem; font-weight: 700; color: #2c4964; margin-bottom: 15px;">Our Address</h3>
+              <p style="color: #666; line-height: 1.6; font-size: 1.05rem;"><?php echo $row['PageDescription']; ?></p>
             </div>
+          </div>
 
-         
+          <!-- Email Card -->
+          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="200">
+            <div class="info-card h-100 p-5 text-center rounded shadow-sm" style="background: #fcfdfd; border: 1px solid #eef5f5; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 15px 35px rgba(63,187,192,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 .125rem .25rem rgba(0,0,0,.075)';">
+              <div class="icon-wrapper mb-4" style="width: 80px; height: 80px; background: #e9f7f8; color: #3fbbc0; font-size: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 4px 15px rgba(63,187,192,0.2);">
+                <i class="bx bx-envelope"></i>
+              </div>
+              <h3 style="font-size: 1.5rem; font-weight: 700; color: #2c4964; margin-bottom: 15px;">Email Us</h3>
+              <p style="margin: 0;"><a href="mailto:<?php echo $row['Email']; ?>" style="color: #3fbbc0; text-decoration: none; font-size: 1.15rem; font-weight: 600;"><?php echo $row['Email']; ?></a></p>
+              <p style="color: #999;font-size: 0.9rem; margin-top:5px;">We reply within 24 hours.</p>
+            </div>
+          </div>
+
+          <!-- Phone Card (Highlighted) -->
+          <div class="col-lg-4 col-md-6" data-aos="zoom-in" data-aos-delay="300">
+            <div class="info-card h-100 p-5 text-center rounded shadow-lg" style="background: linear-gradient(135deg, #3fbbc0 0%, #2f8e91 100%); color: #fff; border: none; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 20px 40px rgba(63,187,192,0.4)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 10px 30px rgba(63,187,192,0.2)';">
+              <div class="icon-wrapper mb-4" style="width: 80px; height: 80px; background: rgba(255,255,255,0.25); color: #fff; font-size: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; backdrop-filter: blur(5px);">
+                <i class="bx bx-phone-call"></i>
+              </div>
+              <h3 style="font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 15px;">Call Us Now</h3>
+              <p style="font-size: 1.4rem; font-weight: 800; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);"><?php echo $row['MobileNumber']; ?></p>
+              <p style="margin-top: 15px; font-size: 0.95rem; opacity: 0.9; background: rgba(0,0,0,0.1); padding: 5px 15px; border-radius: 20px; display: inline-block;">Available 24/7 for Emergencies</p>
+            </div>
+          </div>
 
         </div>
+        <?php } ?>
 
       </div>
     </section><!-- End Contact Section -->

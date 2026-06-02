@@ -7,6 +7,7 @@ include('includes/dbconnection.php');
 <html lang="en">
 
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  
 
   <title>Emergancy Ambulance Hiring Portal</title>
@@ -34,6 +35,39 @@ include('includes/dbconnection.php');
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
+  <style>
+    /* Ensure form and table text is easily readable on mobile */
+    @media (max-width: 768px) {
+      .control-label {
+        font-size: 18px !important;
+        line-height: 1.5 !important;
+      }
+      .form-control {
+        font-size: 16px !important;
+        padding: 12px !important;
+      }
+      .btn {
+        font-size: 16px !important;
+        padding: 10px 20px !important;
+      }
+      .table-responsive .table th, 
+      .table-responsive .table td,
+      .table-responsive .table span {
+        font-size: 16px !important;
+        padding: 14px 10px !important;
+        line-height: 1.6;
+      }
+      .table-responsive .table th {
+        font-weight: 700;
+        background-color: #f7fcfc !important;
+      }
+      .panel-heading {
+        font-size: 18px !important;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -90,7 +124,8 @@ $sdata=$_POST['searchdata'];
    
           Result against "<?php echo $sdata;?>" keyword</div>
 
-      <table class="table" ui-jq="footable" ui-options='{
+      <div class="table-responsive">
+<table class="table" ui-jq="footable" ui-options='{
         "paging": {
           "enabled": true
         },

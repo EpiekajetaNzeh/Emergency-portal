@@ -1,12 +1,17 @@
 <?php
 session_start();
-//error_reporting(0);
 include('includes/dbconnection.php');
+
+if (empty($_GET['id']) || empty($_GET['bookingnum'])) {
+    header('location:ambulance-tracking.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  
 
   <title>Emergancy Ambulance Hiring Portal</title>
@@ -24,6 +29,27 @@ include('includes/dbconnection.php');
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <style>
+    #map { height: 400px; width: 100%; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    
+    /* Ensure table text is clearly visible on mobile devices */
+    @media (max-width: 768px) {
+      .table-responsive .table th, 
+      .table-responsive .table td {
+        font-size: 16px !important;
+        padding: 14px 10px !important;
+        line-height: 1.6;
+      }
+      .table-responsive .table th {
+        font-weight: 700;
+        background-color: #f7fcfc !important;
+      }
+      h3 { font-size: 22px !important; }
+    }
+  </style>
 
 </head>
 
@@ -59,6 +85,7 @@ $ret = mysqli_query($con, "SELECT tblambulancehiring.*,tblambulance.AmbRegNum, t
 while ($row = mysqli_fetch_array($ret)) {
    $arnum = $row['AmbulanceRegNo'];
 ?>
+<div class="table-responsive">
 <table border="1" class="table table-bordered mg-b-0">
     <tr align="center">
         <th colspan="6" style="font-size:20px;color:blue;text-align: center;">
@@ -157,6 +184,13 @@ while ($row = mysqli_fetch_array($ret)) {
 }
 ?>
 
+<div class="row">
+    <div class="col-12">
+        <h3 style="color:blue; margin-bottom: 15px;">Real-time Ambulance Tracking</h3>
+        <div id="map"></div>
+    </div>
+</div>
+
 <?php 
   $bookingnum=$_GET['bookingnum'];
 $query1=mysqli_query($con,"SELECT Remark,Status,UpdationDate,BookingNumber,AmbulanceRegNum FROM tbltrackinghistory
@@ -166,7 +200,8 @@ $count=mysqli_num_rows($query1);
 if($count>0){
      ?>
  <div class="col-12">
-        <table class="table table-bordered" border="1" width="100%">
+        <div class="table-responsive">
+<table class="table table-bordered" border="1" width="100%">
                                         <tr>
                                             <th colspan="6" style="text-align:center;">Tracking History</th>
                                         </tr>
@@ -224,6 +259,42 @@ while($row1=mysqli_fetch_array($query1))
 
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    var map = L.map('map').setView([4.1593, 9.2435], 13);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var marker = L.marker([0, 0]).addTo(map);
+    var bookingNumber = '<?php echo $_GET['bookingnum']; ?>';
+
+    function updateLocation() {
+        fetch('get-ambulance-location.php?booking_number=' + bookingNumber)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    var lat = parseFloat(data.data.Latitude);
+                    var lng = parseFloat(data.data.Longitude);
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        var newLatLng = new L.LatLng(lat, lng);
+                        marker.setLatLng(newLatLng);
+                        map.setView(newLatLng);
+                        marker.bindPopup("<b>Ambulance Registration No:</b> <?php echo $arnum; ?>").openPopup();
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching location:', error));
+    }
+
+    // Update every 5 seconds
+    setInterval(updateLocation, 5000);
+    // Initial update
+    updateLocation();
+  </script>
 
 </body>
 

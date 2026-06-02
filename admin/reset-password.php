@@ -29,8 +29,8 @@ session_destroy();
 <link rel="stylesheet" href="css/bootstrap.min.css" >
 <!-- //bootstrap-css -->
 <!-- Custom CSS -->
-<link href="css/style.css" rel='stylesheet' type='text/css' />
-<link href="css/style-responsive.css" rel="stylesheet"/>
+<link href="css/style.css?v=<?=time()?>" rel='stylesheet' type='text/css' />
+<link href="css/style-responsive.css?v=<?=time()?>" rel="stylesheet"/>
 <!-- font CSS -->
 <link href='//fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
 <!-- font-awesome icons -->

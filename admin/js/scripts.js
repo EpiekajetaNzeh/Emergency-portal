@@ -216,6 +216,8 @@
             });
 
             $('#sidebar').toggleClass('hide-left-bar');
+            $('#sidebar-backdrop').toggleClass('show'); // Toggle Backdrop on mobile
+
             if ($('#sidebar').hasClass('hide-left-bar')) {
                 $(".leftside-navigation").getNiceScroll().hide();
             }
@@ -234,6 +236,13 @@
             }
 
 
+        });
+
+        // Close Sidebar when Backdrop is clicked
+        $('#sidebar-backdrop').on('click', function () {
+            $('#sidebar').removeClass('hide-left-bar');
+            $(this).removeClass('show');
+            $('#main-content').removeClass('merge-left');
         });
         $('.toggle-right-box .fa-bars').click(function (e) {
             $('#container').toggleClass('open-right-panel');

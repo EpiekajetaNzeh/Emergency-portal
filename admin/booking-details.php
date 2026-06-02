@@ -12,13 +12,11 @@ if (strlen($_SESSION['eahpaid']==0)) {
     $bookingnum = $_GET['bookingnum'];
     $remark = $_POST['remark']; 
     $status = $_POST['status'];
- $ambregno2=$_POST['ambregno'];
+    $ambulanceregnum = $_POST['ambulanceregnum'];
 
-if($ambregno2!=''):
-     $ambulanceregnum = $_POST['ambregno'];
-       else:
-   $ambulanceregnum = $_POST['ambulanceregnum'];
-       endif; 
+    if ($status == 'Assigned' && empty($ambulanceregnum)) {
+        echo '<script>alert("Please select an ambulance to assign.")</script>';
+    } else {
 //        echo $ambulanceregnum;
 // exit();
     $updateQuery1 = mysqli_query($con, "UPDATE tblambulance SET status='$status' WHERE AmbRegNum='$ambulanceregnum'");
@@ -30,6 +28,7 @@ if($ambregno2!=''):
         echo "<script type='text/javascript'> document.location ='all-amublance-request.php'; </script>";
     } else {
         echo '<script>alert("Something Went Wrong. Please try again.")</script>';
+    }
     }
 }
 
@@ -46,8 +45,8 @@ if($ambregno2!=''):
 <link rel="stylesheet" href="css/bootstrap.min.css" >
 <!-- //bootstrap-css -->
 <!-- Custom CSS -->
-<link href="css/style.css" rel='stylesheet' type='text/css' />
-<link href="css/style-responsive.css" rel="stylesheet"/>
+<link href="css/style.css?v=<?=time()?>" rel='stylesheet' type='text/css' />
+<link href="css/style-responsive.css?v=<?=time()?>" rel="stylesheet"/>
 <!-- font CSS -->
 <link href='//fonts.googleapis.com/css?family=Roboto:400,100,100italic,300,300italic,400italic,500,500italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
 <!-- font-awesome icons -->
@@ -56,6 +55,46 @@ if($ambregno2!=''):
 <!-- //font-awesome icons -->
 <script src="js/jquery2.0.3.min.js"></script>
 </head>
+<style>
+/* Global Color Overrides for Teal and Black consistency */
+:root {
+    --primary-teal: #3fbbc0;
+    --primary-hover: #36a5a9;
+}
+.btn-primary, .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+    background-color: var(--primary-teal) !important;
+    border-color: var(--primary-teal) !important;
+    color: #fff !important;
+}
+.badge-primary {
+    background-color: var(--primary-teal) !important;
+}
+a {
+    color: var(--primary-teal);
+}
+a:hover {
+    color: var(--primary-hover);
+}
+/* Fix scattered alignment in tables and panels */
+.panel-heading {
+    background: #000 !important;
+    color: var(--primary-teal) !important;
+    font-weight: bold !important;
+}
+.table thead th {
+    background: #f8f9fa;
+    color: #000;
+}
+/* Ensure responsiveness on mobile */
+@media (max-width: 768px) {
+    .market-update-gd {
+        margin-bottom: 15px;
+    }
+    .table-responsive {
+        border: none !important;
+    }
+}
+</style>
 <body>
 <section id="container">
 <!--header start-->
@@ -73,7 +112,7 @@ if($ambregno2!=''):
     <div class="panel-heading">
  Booking Details for an Ambulance
     </div>
-    <div>
+    <div class="table-responsive">
 <?php
 $id = $_GET['id'];   
 $ret = mysqli_query($con, "SELECT * FROM tblambulancehiring WHERE ID = '$id'");
@@ -84,7 +123,7 @@ while ($row = mysqli_fetch_array($ret)) {
 ?>
 <table border="1" class="table table-bordered mg-b-0">
     <tr align="center">
-        <th colspan="6" style="font-size:20px;color:blue;text-align: center;">
+        <th colspan="6" style="font-size:20px;color:#3fbbc0;text-align: center;">
             View Request Details of #<?php echo $row['BookingNumber']; ?></th>
         
     </tr>
@@ -215,14 +254,20 @@ while($row1=mysqli_fetch_array($query1))
 </table></div>
 <?php } ?>
 
+<?php
+// Define pstatus if not already set by tracing history (for cases where no history exists yet)
+if (!isset($pstatus)) {
+    $pstatus = $row['Status'];
+}
+?>
+
  <?php if($pstatus=="" || $pstatus=="Assigned" || $pstatus=="On the way" || $pstatus=="Pickup"){ ?>
 <table border="1" class="table table-bordered mg-b-0">
    
-    <tr><td colspan="6" style="font-size:18px;text-align: center;color: blue;">Administrator Work</td></tr>
+    <tr><td colspan="6" style="font-size:18px;text-align: center;color: #3fbbc0;">Administrator Work</td></tr>
 
 <form method="post" name="submit">
 
- <input type="hidden" name="ambregno" value="<?php echo $arnum;?>">
   <tr>
     <th>Status :</th>
     <td> <select class=" form-control" id="status" name="status" type="text" required="true" value="">
@@ -246,11 +291,12 @@ while($row1=mysqli_fetch_array($query1))
    <select name="ambulanceregnum" id="ambulanceregnum" class="form-control wd-450" >
 
 <option value="">Select</option>
-     <?php $query=mysqli_query($con,"select * from tblambulance where Status is null || Status='Reached'");
+     <?php $query=mysqli_query($con,"select * from tblambulance where Status is null || Status='Reached' || AmbRegNum='$arnum'");
               while($row3=mysqli_fetch_array($query))
               {
               ?>    
-              <option value="<?php echo $row3['AmbRegNum'];?>"><?php   $atype=$row3['AmbulanceType'];  
+              <option value="<?php echo $row3['AmbRegNum'];?>" <?php if($arnum == $row3['AmbRegNum']) echo 'selected'; ?>>
+<?php   $atype=$row3['AmbulanceType'];  
                  if($atype=="1"){ ?>
                   <p>Basic Life Support (BLS) Ambulances</p>
                 <?php } elseif($atype=="2"){ ?>

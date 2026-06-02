@@ -145,16 +145,35 @@
 
     #sidebar{
         margin-left:-240px;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        z-index: 10001 !important;
         -webkit-transition:all .3s ease-in-out;
         -moz-transition:all .3s ease-in-out;
         -o-transition:all .3s ease-in-out;
         transition:all .3s ease-in-out;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.5);
     }
     .hide-left-bar {
-        margin-left:0px!important;
+        margin-left:240px !important;
+    }
+    .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(2px);
+        z-index: 10000 !important;
+    }
+    .sidebar-backdrop.show {
+        display: block;
     }
     ul.sidebar-menu{
-        padding-top: 0px;
+        padding-top: 20px;
     }
     /*-*/
     .prd-row .action {
