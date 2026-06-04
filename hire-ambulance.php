@@ -29,10 +29,18 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
         $state = $_POST['state'];
         $message = $_POST['message'];
         $ambid = $_POST['ambulance_id'];
+        $payment_amount = isset($_POST['payment_amount']) ? preg_replace('/[^0-9]/', '', $_POST['payment_amount']) : '30000';
+        $payment_phone = isset($_POST['payment_phone']) ? preg_replace('/[^0-9+]/', '', $_POST['payment_phone']) : '';
         // Phone validation (9 digits)
         $errors = array();
         if (!preg_match('/^[0-9]{9}$/', $phone)) {
-            $errors[] = "Phone number must be exactly 9 digits.";
+            $errors[] = "Relative phone number must be exactly 9 digits.";
+        }
+        if (empty($payment_phone) || !preg_match('/^[0-9]{9,15}$/', preg_replace('/^\+/', '', $payment_phone))) {
+            $errors[] = "Please enter a valid mobile money phone number.";
+        }
+        if (empty($payment_amount) || intval($payment_amount) < 1) {
+            $errors[] = "Please enter a valid amount to pay.";
         }
         if (empty($errors)) {
             $ambregno = '';
@@ -44,7 +52,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $payment_status = $transaction_id ? 'Paid' : 'Pending';
 
             // Status is NULL by default for "New Request"
-            $query = mysqli_query($con, "INSERT INTO tblambulancehiring (BookingNumber, PatientName, RelativeName, RelativeConNum, HiringDate, HiringTime, AmbulanceType, Address, City, State, Message, AmbulanceRegNo, Status, PaymentStatus, TransactionID) VALUES ('$bookingnum', '$pname', '$rname', '$phone', '$hdate', '$htime', '$ambulancetype', '$address', '$city', '$state', '$message', '$ambregno', NULL, '$payment_status', '$transaction_id')");
+            $query = mysqli_query($con, "INSERT INTO tblambulancehiring (BookingNumber, PatientName, RelativeName, RelativeConNum, HiringDate, HiringTime, AmbulanceType, Address, City, State, Message, AmbulanceRegNo, Status, PaymentStatus, TransactionID, AmountPaid, PaymentNumber) VALUES ('$bookingnum', '$pname', '$rname', '$phone', '$hdate', '$htime', '$ambulancetype', '$address', '$city', '$state', '$message', '$ambregno', NULL, '$payment_status', '$transaction_id', '$payment_amount', '$payment_phone')");
             if ($query) {
                 echo "<script>alert('Your request has been sent successfully. Your Booking Number is: $bookingnum');</script>";
                 echo "<script type='text/javascript'> document.location = 'index.php'; </script>";
@@ -139,7 +147,33 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <label for="message" class="form-label">Message (Optional)</label>
                 <textarea class="form-control" id="message" name="message" rows="2"></textarea>
             </div>
+
+            <!-- Payment Section -->
             <div class="col-12 mt-3">
+                <hr style="border-color: #3fbbc0;">
+                <h5 class="fw-bold mb-3" style="color:#2c4964;"><i class="fas fa-credit-card me-2" style="color:#3fbbc0;"></i>Payment Information</h5>
+            </div>
+            <div class="col-md-6">
+                <label for="payment_phone" class="form-label fw-bold">Mobile Money Phone Number <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text" style="background:#e9f7f8; color:#3fbbc0; border-color:#3fbbc0;"><i class="fas fa-mobile-alt"></i></span>
+                    <input type="tel" class="form-control" id="payment_phone" name="payment_phone"
+                        placeholder="e.g. 676123456" maxlength="15" required
+                        title="Enter your MTN or Orange mobile money number">
+                </div>
+                <small class="text-muted">Enter the number to be charged (MTN/Orange MoMo)</small>
+            </div>
+            <div class="col-md-6">
+                <label for="payment_amount" class="form-label fw-bold">Amount to Pay (FCFA) <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text" style="background:#e9f7f8; color:#3fbbc0; border-color:#3fbbc0;"><i class="fas fa-coins"></i></span>
+                    <input type="number" class="form-control" id="payment_amount" name="payment_amount"
+                        value="30000" min="30000" required
+                        title="Minimum amount is 30,000 FCFA">
+                </div>
+                <small class="text-muted">Minimum fee is 30,000 FCFA</small>
+            </div>
+            <div class="col-12 mt-2">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="" id="paymentAgreement" required>
                     <label class="form-check-label fw-bold" for="paymentAgreement">
@@ -190,15 +224,16 @@ document.getElementById('ambulanceForm').addEventListener('submit', function(e) 
         // Ensure form is valid before initiating payment
         if (this.checkValidity()) {
             var patientName = document.getElementById('pname').value;
-            var relativePhone = document.getElementById('phone').value;
+            var paymentPhone = document.getElementById('payment_phone').value;
+            var paymentAmount = document.getElementById('payment_amount').value || '30000';
             
-            // Configure CamPay options dynamically
+            // Configure CamPay options dynamically with user-entered amount and phone
             campay.options({
                 payButtonId: "payButton",
                 description: "Ambulance Hire - " + patientName,
-                amount: "30000",
+                amount: paymentAmount,
                 currency: "XAF",
-                externalReference: relativePhone,
+                externalReference: paymentPhone,
                 redirectUrl: ""
             });
             

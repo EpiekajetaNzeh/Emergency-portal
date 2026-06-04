@@ -200,6 +200,12 @@ while ($row = mysqli_fetch_array($ret)) {
         <th>Transaction ID</th>
         <td><?php echo !empty($row['TransactionID']) ? htmlentities($row['TransactionID']) : 'N/A'; ?></td>
     </tr>
+    <tr>
+        <th>Amount Paid (FCFA)</th>
+        <td><?php echo !empty($row['AmountPaid']) ? number_format(intval($row['AmountPaid'])) . ' FCFA' : 'N/A'; ?></td>
+        <th>Mobile Money Number</th>
+        <td><?php echo !empty($row['PaymentNumber']) ? htmlentities($row['PaymentNumber']) : 'N/A'; ?></td>
+    </tr>
     <!-- Display other request details -->
 
     <?php if ($row['Remark'] != ''): ?>

@@ -42,7 +42,7 @@ CREATE TABLE `tbladmin` (
 --
 
 INSERT INTO `tbladmin` (`ID`, `AdminName`, `UserName`, `MobileNumber`, `Email`, `Password`, `AdminRegdate`) VALUES
-(1, 'Code Camp BD', 'admin', 1608445456, 'admin@gmail.com', '714610777dd05a47ffe4bb9807cc3320', '2024-09-27 08:56:46');
+(1, 'Epie', 'admin', 1608445456, 'admin@gmail.com', 'adcf5de23fb2f74da6a1b67cdd1e4818', '2024-09-27 08:56:46');
 
 -- --------------------------------------------------------
 
@@ -96,6 +96,8 @@ CREATE TABLE `tblambulancehiring` (
   `AmbulanceRegNo` varchar(250) DEFAULT NULL,
   `PaymentStatus` varchar(100) DEFAULT NULL,
   `TransactionID` varchar(200) DEFAULT NULL,
+  `AmountPaid` varchar(50) DEFAULT NULL,
+  `PaymentNumber` varchar(50) DEFAULT NULL,
   `UpdationDate` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

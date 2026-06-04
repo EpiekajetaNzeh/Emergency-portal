@@ -38,9 +38,24 @@
             <!-- Column 4: Contact -->
             <div class="footer-col contact">
                 <h4>Contact Us</h4>
-                <p><i class="fa fa-map-marker"></i> Buea, Cameroon</p>
-                <p><i class="fa fa-phone"></i> +237 600 000 000</p>
-                <p><i class="fa fa-envelope"></i> help@ambullance.com</p>
+                <?php
+                $footer_email = 'help@ambullance.com';
+                $footer_phone = '671683311';
+                $footer_address = 'Buea, Cameroon';
+                if (isset($con)) {
+                    $ft_query = mysqli_query($con, "SELECT Email, MobileNumber, PageDescription FROM tblpage WHERE PageType='contactus'");
+                    if ($ft_query && mysqli_num_rows($ft_query) > 0) {
+                        $ft_data = mysqli_fetch_assoc($ft_query);
+                        $footer_email = !empty($ft_data['Email']) ? $ft_data['Email'] : $footer_email;
+                        $footer_phone = !empty($ft_data['MobileNumber']) ? $ft_data['MobileNumber'] : $footer_phone;
+                        $footer_address = !empty($ft_data['PageDescription']) ? $ft_data['PageDescription'] : $footer_address;
+                    }
+                }
+                $display_phone = (strpos($footer_phone, '+') === 0) ? $footer_phone : '+237 ' . $footer_phone;
+                ?>
+                <p><i class="fa fa-map-marker"></i> <?php echo htmlspecialchars($footer_address); ?></p>
+                <p><i class="fa fa-phone"></i> <?php echo htmlspecialchars($display_phone); ?></p>
+                <p><i class="fa fa-envelope"></i> <?php echo htmlspecialchars($footer_email); ?></p>
             </div>
         </div>
         
